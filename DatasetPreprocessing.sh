@@ -120,7 +120,7 @@ o)if [ $correctFormat -eq 0 ]
     then echo "correct format"
          echo "Please input the name of the categorical feature for label encoding"
          read CatFeature
-         if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o ">
+         if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o "$CatFeature" == "governorate" ]
             then echo "correct categorical feature"
                 First=$(grep "^1;" dataset.txt)
                 case $CatFeature in
@@ -207,7 +207,7 @@ fi;;
 
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
-*) printf "osaid"
+*) echo "Invalid option ,please try again";;
 esac
 
 done
