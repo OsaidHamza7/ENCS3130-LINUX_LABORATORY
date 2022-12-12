@@ -69,17 +69,107 @@ if [ $correctFormat -eq 0 ]
 	 read CatFeature
          if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o "$CatFeature" == "governorate" ]
    	    then echo "correct categorical feature"
-	    
+		First=$(grep "^1;" dataset.txt)
+		case $CatFeature in
+
+		   "gender")
+		    	   Gen=$(echo "$First" | cut -d';' -f3)
+		           echo $Gen
+                          if [ "$Gen" == "male" ]
+				echo "male:0 , female:1"
+				then sed 's/;male/;0/;s/female/1/' dataset.txt > Gen.txt
+			   else
+				  echo "female:0 , male:1"
+				  sed 's/;male/;1/;s/female/0/' dataset.txt > Gen.txt
+			  fi;;
+
+                   "active")
+                           Act=$(echo "$First" | cut -d';' -f6)
+                           echo $Act
+                          if [ "$Act" == "yes" ]
+                                then
+					echo "yes:0 , no:1"
+	sed 's/yes;yes/0;yes/;s/no;no/1;no/;s/yes;no/0;no/;s/no;yes/1;yes/' dataset.txt > Act.txt
+              		  else
+				echo "no:0 , yes:1"
+	sed 's/yes;yes/1;yes/;s/no;no/0;no/;s/yes;no/1;no/;s/no;yes/0;yes/' dataset.txt > Act.txt    
+                          fi;;
+
+                   "smoke")
+                           Smk=$(echo "$First" | cut -d';' -f7)
+                           echo $Smk
+                          if [ "$Smk" == "yes" ]
+     				then
+				    echo "yes:0 , no:1"
+			            sed 's/yes;yes/yes;0/;s/no;no/no;1/;s/yes;no/yes;1/;s/no;yes/no;0/' dataset.txt > Smk.txt
+			  else
+				echo "no:0 , yes:1"
+  				sed 's/yes;yes/yes;1/;s/no;no/no;0/;s/yes;no/yes;0/;s/no;yes/no;1/' dataset.txt > Smk.txt
+                          fi;;
+
+		esac
 	 else
 	    echo "the name of categorical feature is wrong"
-         fi 
+         fi
 else
   echo "You must first read a dataset from a file"
 
+fi;;
+#//////////////////////////////////////////////////////////////////////////////////////////////////
+o)if [ $correctFormat -eq 0 ]
+    then echo "correct format"
+         echo "Please input the name of the categorical feature for label encoding"
+         read CatFeature
+         if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o ">
+            then echo "correct categorical feature"
+                First=$(grep "^1;" dataset.txt)
+                case $CatFeature in
 
-fi;;   	
+                   "gender")
+                           Gen=$(echo "$First" | cut -d';' -f3)
+                           echo $Gen
+                          if [ "$Gen" == "male" ]
+                                echo "male:1;0 , female:0;1"
+                                then sed 's/;male/;1;0/;s/female/0;1/' dataset.txt > Gen.txt
+                           else
+                                  echo "female:1;0 , male:0;1"
+                                  sed 's/;male/;0;1/;s/female/1;0/' dataset.txt > Gen.txt
+                          fi;;
+
+                   "active")
+                           Act=$(echo "$First" | cut -d';' -f6)
+                           echo $Act
+                          if [ "$Act" == "yes" ]
+                                then  
+                                        echo "yes:1;0 , no:0;1"
+				        sed 's/yes;yes/1;0;yes/;s/no;no/0;1;no/;s/yes;no/1;0;no/;s/no;yes/0;1;yes/' dataset.txt > Act.txt
+                          else
+                                echo "no:1;0 , yes:0;1"
+  				sed 's/yes;yes/0;1;yes/;s/no;no/1;0;no/;s/yes;no/0;1;no/;s/no;yes/1;0;yes/' dataset.txt > Act.txt    
+                          fi;;
+
+                   "smoke")
+                           Smk=$(echo "$First" | cut -d';' -f7)
+                           echo $Smk
+                          if [ "$Smk" == "yes" ]
+                                then
+                                        echo "yes:1;0 , no:0;1"
+				        sed 's/yes;yes/1;0;yes/;s/no;no/0;1;no/;s/yes;no/1;0;no/;s/no;yes/0;1;yes/' dataset.txt > Act.txt
+                          else
+                                echo "no:1;0 , yes:0;1"
+ 			        sed 's/yes;yes/0;1;yes/;s/no;no/1;0;no/;s/yes;no/0;1;no/;s/no;yes/1;0;yes/' dataset.txt > Act.txt  
+                          fi;;
+                esac
+         else
+            echo "the name of categorical feature is wrong"
+         fi
+else
+     echo "You must first read a dataset from a file"
+
+fi;;
+
 #//////////////////////////////////////////////////////////////////////////////////////////////
-s)   if [ $correctFormat -eq 0 ] 
+s)   if [ $correctFormat -eq 0 ]
       then
 	echo "Please input the name of dataset file"
         read saveFile
@@ -94,19 +184,19 @@ s)   if [ $correctFormat -eq 0 ]
 e)
 
 if [ $correctFormat -eq 0 ]
- then 
+ then
   if [ $savedValue -eq 0 ]
       then
 	   echo "Are you sure you want to exist"
 	   read saveOption
            if [ "$saveOption" == "yes" ]
-             then break	
+             then break
            fi
     else
 	   echo "The processed dataset is not saved.Are you sure you want to exist"
            read saveOption
            if [ "$saveOption" == "yes" ]
-             then break 	
+             then break
            fi
 
     fi
@@ -117,8 +207,7 @@ fi;;
 
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
-*) echo "Invalid option,please try agein";;
-
+*) printf "osaid"
 esac
 
 done
