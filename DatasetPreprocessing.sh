@@ -174,6 +174,34 @@ o)if [ $correctFormat -eq 0 ]
                                 echo "no:1;0 , yes:0;1"
  			        sed 's/yes;yes/0;1;yes/;s/no;no/1;0;no/;s/yes;no/0;1;no/;s/no;yes/1;0;yes/' dataset.txt > Act.txt  
                           fi;;
+
+                "governorate")
+                             Gover=$(cat dataset.txt | cut -d';' -f8 )
+                             echo "$Gover" | tr ' ' '\12' | sed '1d' > test.txt 
+                             cat -n test.txt | sort -uk2 | sort -n | cut -f2- > TEST
+                             mv TEST test.txt
+			     Number=$(wc -l test.txt | cut -c 1)
+			     echo "Number is :${Number}"
+			     zeros=""
+			     while [ "$Number" -gt 0 ]
+				do
+				  zeros+="0;"
+			          Number=$((Number - 1 ))
+				done
+			     echo "${zeros}" > zeros.txt
+                             cat dataset.txt > CopyDataset.txt
+			     n=1
+                             for  i in `cat test.txt`
+                                do
+				  value=$(sed "s/0/1/${n}" zeros.txt)
+                                   echo "${i}:${value}"
+                                   sed "s/${i};/${value}/" CopyDataset.txt > temp
+                                   mv temp CopyDataset.txt
+                                   n=$(( n + 1 ))
+                                done
+                                cat CopyDataset.txt > Gover.txt
+                             ;;
+
                 esac
          else
             echo "the name of categorical feature is wrong"
