@@ -94,7 +94,7 @@ if [ $correctFormat -eq 0 ]
 				echo "no:0 , yes:1"
 	sed 's/yes;yes/1;yes/;s/no;no/0;no/;s/yes;no/1;no/;s/no;yes/0;yes/' dataset.txt > Act.txt    
                           fi;;
-
+	
                    "smoke")
                            Smk=$(echo "$First" | cut -d';' -f7)
                            echo $Smk
@@ -106,7 +106,22 @@ if [ $correctFormat -eq 0 ]
 				echo "no:0 , yes:1"
   				sed 's/yes;yes/yes;1/;s/no;no/no;0/;s/yes;no/yes;0/;s/no;yes/no;1/' dataset.txt > Smk.txt
                           fi;;
-
+		"governorate")
+			     Gover=$(cat dataset.txt | cut -d';' -f8 )
+			     echo "$Gover" | tr ' ' '\12' | sed '1d' > test.txt 
+			     cat -n test.txt | sort -uk2 | sort -n | cut -f2- > TEST
+			     mv TEST test.txt
+			     cat dataset.txt > CopyDataset.txt
+			     value=0
+			     for  i in `cat test.txt`
+				do
+				   echo "${i}:${value}"
+				   sed "s/${i}/${value}/" CopyDataset.txt > temp
+				   mv temp CopyDataset.txt
+				   value=$(( value + 1 ))
+				done
+				cat CopyDataset.txt > Gover.txt
+			     ;;
 		esac
 	 else
 	    echo "the name of categorical feature is wrong"
@@ -120,8 +135,8 @@ o)if [ $correctFormat -eq 0 ]
     then echo "correct format"
          echo "Please input the name of the categorical feature for label encoding"
          read CatFeature
-         if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o "$CatFeature" == "governorate" ]
-            then echo "correct categorical feature"
+       	     if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o "$CatFeature" == "governorate" ]
+                then echo "correct categorical feature"
                 First=$(grep "^1;" dataset.txt)
                 case $CatFeature in
 
@@ -207,7 +222,8 @@ fi;;
 
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
-*) echo "Invalid option ,please try again";;
+*) echo "Invalid option,please try again"
 esac
 
 done
+
