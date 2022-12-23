@@ -172,36 +172,59 @@ else
 fi;;
 
 #/////////////////////////////////////////////////////////////////////
-m)  if [ $correctFormat -eq 0 ]
-	then echo "Please input the name of the feature to be scaled"
-	    read Feature
-                case $Feature in
-		"gender")if [ $gg -eq 0 ]
-			    then echo "correct" 
-                         else echo "this feature is categorical feature and must be ecnocded first"			
-                         fi;;
-    
-		"active") 
-			if [ $aa -eq 0 ]
-                            then echo "correct" 
-			 else echo "this feature is categorical feature and must be ecnocded first"
-			fi;;
-		
-		"smoke")if [ $ss -eq 0 ]
-                            then echo "correct" 
-			else echo "this feature is categorical feature and must be ecnocded first"
-			fi;;
+m)
+if [ $correctFormat -eq 1 ]
+	then echo "Please input the name of the feature to be scaled:"
+	    read Feature 
+    	checkFeature=$(sed -n 1p CopyDataset.txt| grep "$Feature"|wc -c)
+      	if [ $checkFeature -gt 0 ];then
+       			sed -n 1p CopyDataset.txt | tr ";" "\12" > features.txt
+       			i=1
+       			for j in `cat features.txt`
+       			do
+       			     if [ "$j" == "$Feature" ]
+				then break
+			     fi
+				i=$(( i + 1 ))
+	   		done
+         		#i is a number of categorical in features
+	     		     cat CopyDataset.txt | cut -d";" -f"$i"  > column.txt
+			    #column of this categorical feature
+			     cat column.txt > uniqe.txt
+	     		     cat -n uniqe.txt | sort -uk2 | sort -n | cut -f2- > Temp
+			     mv Temp uniqe.txt
+			     #make this column uniqe
 
-		"governorate")if [ $vv -eq 0 ]
-				then echo "correct"
-			      else echo "this feature is categorical feature and must be encoded first"
-			      fi;;
-		
 
-		esac
-   else echo "You must first read a dataset from a file" 
-    fi;;
 
+			     min=$(sort -n uniqe.txt | sed -n '2p')
+			     max=$(sort -r -n uniqe.txt | sed -n '1p')
+			     result=$(( max - min ))
+
+			     value=-1
+			     echo
+			     echo "-------------------------------"
+                             for c in `cat uniqe.txt`
+                             do	  if [ $value -ge 0 ];then
+				   new=$(echo "scale=1; ($c - $min) / $result"|bc )
+                                   echo "$c:$new"
+                                   sed -i "s/^${c}$/$new/" column.txt
+				  else sed -i "s/$c/$c/" column.txt
+				  fi
+                                   value=$(( value + 1 ))
+                             done
+			    echo "-------------------------------"
+			   cat CopyDataset.txt | tr ";" " " > copy.txt
+			   awk 'NR == FNR {a[FNR] = $B;next}{$A = a[FNR]; print}' B=1 A=$i "column.txt" "copy.txt" > Temp
+			   mv Temp CopyDataset.txt
+			   cat CopyDataset.txt | tr " " ";" > Temp
+			   mv Temp CopyDataset.txt
+			   sed -i 's/$/;/' CopyDataset.txt
+
+	else echo "The name of categorical feature is wrong"
+        fi
+else echo "You must first read a dataset from a file" 
+fi;;
 #//////////////////////////////////////////////////////////////////////////////////////////////
 s)   if [ $correctFormat -eq 1 ]
       then
