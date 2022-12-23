@@ -1,10 +1,6 @@
 dos="True"
 savedValue=0
 correctFormat=0
-gg=1
-vv=1
-aa=1
-ss=1
 while ((dos=="True")) 
 do
 echo
@@ -20,22 +16,21 @@ echo "e) exit"
 echo
 echo "********************************************************" 
 echo
-echo "please enter your option"
+echo "please enter your option:"
 read option
 case $option in 
 
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
-r) echo "Please input the name of dataset file"
+r) echo "Please input the name of dataset file:"
 	read FileName
 	if [ -e $FileName ];then
-		 echo "file does exist"
                firstLine=$(sed -n 1p dataset.txt)
 	       secondLine=$(sed -n 2p dataset.txt)
 		a=$(echo $firstLine | tr ";" "\n" | wc -l)
 	       b=$(echo $secondLine | tr ";" "\n" | wc -l)
 	      	if [ $a -eq $b ];then
-		       echo "The format of the data in the dataset file is verified correctly"
+		       echo "The format of the data in the dataset file was verified correctly"
                        correctFormat=1
 			cat dataset.txt > CopyDataset.txt
 		else
@@ -47,20 +42,11 @@ r) echo "Please input the name of dataset file"
 	    echo "file does not exist"
 	    correctFormat=0
 	fi;;
-
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
 p) if [ $correctFormat -eq 1 ];then
-	echo "correct format"
         echo "--------------------------------------------------------"
-	echo
-	echo "names of all features of the dataset file:"
-	echo
-         for i in `cat CopyDataset.txt`
-           do
-             echo $i | tr ";" '\11'
-           done
-	echo 
+	     sed -n '1p' CopyDataset.txt | tr ";" ","
 	echo "--------------------------------------------------------"
    else
      echo "You must first read a dataset from a file"
@@ -69,126 +55,114 @@ p) if [ $correctFormat -eq 1 ];then
 #//////////////////////////////////////////////////////////////////////////////////////////////
 l)
 if [ $correctFormat -eq 1 ];then
-	 echo "Please input the name of the categorical feature for label encoding"
+	 echo "Please input the name of the categorical feature for label encoding:"
     	 read CatFeature
      	checkFeature=$(sed -n 1p CopyDataset.txt| grep "$CatFeature"|wc -c)
       	if [ $checkFeature -gt 0 ];then
-			echo "correct categorical feature"
-       			sed -n 1p dataset.txt | tr ";" "\12" > f.txt
+       			sed -n 1p CopyDataset.txt | tr ";" "\12" > features.txt
        			i=1
-       			for j in `cat f.txt`
+       			for j in `cat features.txt`
        			do
        			     if [ "$j" == "$CatFeature" ]
 				then break
 			     fi
 				i=$(( i + 1 ))
 	   		done
-         
-	     		     cat CopyDataset.txt | cut -d";" -f"$i"> column.txt
-			     cat column.txt > copy.txt
-	     		     cat -n column.txt | sort -uk2 | sort -n | cut -f2- > Temp
-			     mv Temp column.txt
+         		#i is a number of categorical in features
+	     		     cat CopyDataset.txt | cut -d";" -f"$i" > column.txt
+			    #column of this categorical feature
+			     cat column.txt > uniqe.txt
+	     		     cat -n uniqe.txt | sort -uk2 | sort -n | cut -f2- > Temp
+			     mv Temp uniqe.txt
+			     #make this column uniqe
 			     value=-1
-                             for c in `cat column.txt`
+			     echo
+			     echo "-------------------------------"
+                             for c in `cat uniqe.txt`
                              do	  if [ $value -ge 0 ];then
                                    echo "$c:$value"
-                                   sed "s/^$c/$value/" copy.txt > temp
-                                   mv temp copy.txt
+                                   sed -i "s/^$c/$value/" column.txt
 				  fi
                                    value=$(( value + 1 ))
                              done
-			   cat CopyDataset.txt | tr ";" "\11" > dota.txt			  
-			   readarray -t re < copy.txt
-			   awk 'NR == FNR {a[FNR] = $B;next}{$A = a[FNR]; print}' B=1 A=$i "copy.txt" "dota.txt"  > "file3.txt"
-			
-			   
-			
+			    echo "-------------------------------"
+			   cat CopyDataset.txt | tr ";" " " > copy.txt
+			   awk 'NR == FNR {a[FNR] = $B;next}{$A = a[FNR]; print}' B=1 A=$i "column.txt" "copy.txt" > Temp
+			   mv Temp CopyDataset.txt
+			   cat CopyDataset.txt | tr " " ";" > Temp
+			   mv Temp CopyDataset.txt
+			   sed -i 's/$/;/' CopyDataset.txt
 
-	else echo "wrong categorical feature"
+	else echo "The name of categorical feature is wrong"
         fi
 else
   echo "You must first read a dataset from a file"
 
 fi;;
-
 #//////////////////////////////////////////////////////////////////////////////////////////////////
 
-o)if [ $correctFormat -eq 0 ]
-    then echo "correct format"
-         echo "Please input the name of the categorical feature for label encoding"
+o)if [ $correctFormat -eq 1 ]
+    then echo "Please input the name of the categorical feature for label encoding:"
          read CatFeature
-       	     if [ "$CatFeature" == "gender" -o "$CatFeature" == "active" -o "$CatFeature" == "smoke" -o "$CatFeature" == "governorate" ]
-                then echo "correct categorical feature"
-                First=$(grep "^1;" dataset.txt)
-                case $CatFeature in
+       	 checkFeature=$(sed -n 1p CopyDataset.txt| grep "$CatFeature"|wc -c)
+         if [ $checkFeature -gt 0 ];then
+            sed -n 1p CopyDataset.txt | tr ";" "\12" > features.txt
+	    numberFeatures=$(wc -l features.txt | cut -c 1)
+            	 	i=1
+           	 	for j in `cat features.txt`
+           	 	do
+                             if [ "$j" == "$CatFeature" ]
+                                then break
+                             fi
+                                i=$(( i + 1 ))
+                        done
+                             #i is a number of categorical in features
+                             cat CopyDataset.txt | cut -d";" -f"$i" > column.txt
+                             #column of this categorical feature
+			     cat column.txt > uniqe.txt
+                             cat -n uniqe.txt | sort -uk2 | sort -n | cut -f2- > Temp
+                             mv Temp uniqe.txt
+                             #make this column uniqe
+			     Number=$(wc -l uniqe.txt | cut -d" " -f1)
+			     if [ $i -eq 1 ];then
+			       cut -d ";" -f2- CopyDataset.txt > Temp
+			     elif [ $i -eq $numberFeatures ];then
+				v=$(( i - 1 ))
+				cut -d ";" -f1-$v CopyDataset.txt > Temp
+			     else
+				v=$(( i + 1 ))
+				d=$(( i - 1 ))
+				cut -d ";" -f 1-$d,$v- CopyDataset.txt > Temp
+			     fi
+			     mv Temp CopyDataset.txt
 
-                   "gender")
-			   gg=0
-                           Gen=$(echo "$First" | cut -d';' -f3)
-                           echo $Gen
-                          if [ "$Gen" == "male" ]
-                                echo "male:1;0 , female:0;1"
-                                then sed 's/;male/;1;0/;s/female/0;1/' dataset.txt > Gen.txt
-                           else
-                                  echo "female:1;0 , male:0;1"
-                                  sed 's/;male/;0;1/;s/female/1;0/' dataset.txt > Gen.txt
-                          fi;;
-
-                   "active")
-			   aa=0
-                           Act=$(echo "$First" | cut -d';' -f6)
-                           echo $Act
-                          if [ "$Act" == "yes" ]
-                                then  
-                                        echo "yes:1;0 , no:0;1"
-				        sed 's/yes;yes/1;0;yes/;s/no;no/0;1;no/;s/yes;no/1;0;no/;s/no;yes/0;1;yes/' dataset.txt > Act.txt
-                          else
-                                echo "no:1;0 , yes:0;1"
-  				sed 's/yes;yes/0;1;yes/;s/no;no/1;0;no/;s/yes;no/0;1;no/;s/no;yes/1;0;yes/' dataset.txt > Act.txt    
-                          fi;;
-
-                   "smoke")
-			   ss=0
-                           Smk=$(echo "$First" | cut -d';' -f7)
-                           echo $Smk
-                          if [ "$Smk" == "yes" ]
-                                then
-                                        echo "yes:1;0 , no:0;1"
-				        sed 's/yes;yes/1;0;yes/;s/no;no/0;1;no/;s/yes;no/1;0;no/;s/no;yes/0;1;yes/' dataset.txt > Act.txt
-                          else
-                                echo "no:1;0 , yes:0;1"
- 			        sed 's/yes;yes/0;1;yes/;s/no;no/1;0;no/;s/yes;no/0;1;no/;s/no;yes/1;0;yes/' dataset.txt > Act.txt  
-                          fi;;
-
-                "governorate")
-			     vv=0
-                             Gover=$(cat dataset.txt | cut -d';' -f8 )
-                             echo "$Gover" | tr ' ' '\12' | sed '1d' > test.txt 
-                             cat -n test.txt | sort -uk2 | sort -n | cut -f2- > TEST
-                             mv TEST test.txt
-			     Number=$(wc -l test.txt | cut -c 1)
-			     echo "Number is :${Number}"
 			     zeros=""
-			     while [ "$Number" -gt 0 ]
+			     while [ "$Number" -gt 1 ]
 				do
 				  zeros+="0;"
-			          Number=$((Number - 1 ))
+			          Number=$(( Number - 1 ))
 				done
 			     echo "${zeros}" > zeros.txt
-                             cat dataset.txt > CopyDataset.txt
-			     n=1
-                             for  i in `cat test.txt`
+			     newFeature=""
+			     n=0
+			     echo
+                             echo "-------------------------------"
+                             for  i in `cat uniqe.txt`
                                 do
-				  value=$(sed "s/0/1/${n}" zeros.txt)
-                                   echo "${i}:${value}"
-                                   sed "s/${i};/${value}/" CopyDataset.txt > temp
-                                   mv temp CopyDataset.txt
+				   if [ $n -gt 0 ];then
+				   newFeature+="${CatFeature}-${i};"
+				   newValue=$(sed "s/0/1/${n}" zeros.txt)
+                                   echo "${i}:${newValue}"
+                                   sed "s/^${i}$/${newValue}/" column.txt > temp
+                                   mv temp column.txt
+				   fi
                                    n=$(( n + 1 ))
                                 done
-                                cat CopyDataset.txt > Gover.txt
-                             ;;
-
-                esac
+				echo "-------------------------------"
+				sed "s/${CatFeature}/${newFeature}/" column.txt > temp
+                                mv temp column.txt
+                               paste -d "" CopyDataset.txt column.txt > Temp
+				mv Temp CopyDataset.txt
          else
             echo "the name of categorical feature is wrong"
          fi
@@ -231,9 +205,9 @@ m)  if [ $correctFormat -eq 0 ]
 #//////////////////////////////////////////////////////////////////////////////////////////////
 s)   if [ $correctFormat -eq 1 ]
       then
-	echo "Please input the name of dataset file"
+	echo "Please input the name of the file to save the processed dataset:"
         read saveFile
-        cat dataset.txt > $saveFile
+        cat CopyDataset.txt > $saveFile
         savedValue=1
 	echo "processed dataset was saved successfully"
      else
