@@ -1,3 +1,0 @@
-id;age;gender;height;weight;active;smoke;governorate;
-1;30;male;170;88;no;yes;ramallah;
-2;25;female;160;65;no;no;ramallah;
