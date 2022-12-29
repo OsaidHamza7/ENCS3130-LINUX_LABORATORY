@@ -1,0 +1,11 @@
+id;age;gender;height;weight;active;smoke;governorate;
+1;30;female;170;88;no;yes;ramallah;
+2;25;female;160;65;no;no;ramallah;
+3;28;female;165;72;yes;yes;nablus;
+4;44;female;188;90;no;no;jerusalem;
+5;60;female;166;70;no;no;jerusalem;
+6;77;female;160;108;no;yes;ramallah;
+7;25;female;160;65;no;no;hebron;
+8;28;female;165;72;yes;yes;tulkarm;
+9;44;female;188;90;no;no;hebron;
+10;60;female;166;70;no;no;jericho;
